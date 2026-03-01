@@ -7,7 +7,7 @@ module.exports = {
     alias: ['s'],
     category: 'converter',
     description: 'Convert image or video to sticker',
-    async execute(sock, m, args) {
+    async execute(sock, m, args, pushName) {
         const remoteJid = m.key.remoteJid;
 
         try {
@@ -16,19 +16,19 @@ module.exports = {
             const targetMsg = m.message?.imageMessage || m.message?.videoMessage || quoted?.imageMessage || quoted?.videoMessage;
 
             if (!targetMsg) {
-                return await sock.sendMessage(remoteJid, { text: "Anu, පින්තූරයකට හෝ වීඩියෝවකට රිප්ලයි කරන්න. නැත්නම් කැප්ෂන් එකේ .sticker කියලා දාන්න." }, { quoted: m });
+                return await sock.sendMessage(remoteJid, { text: "${pushName}, Please reply to a image or video. Or type ${config.prefix}sticker / ${config.prefix}s as caption." }, { quoted: m });
             }
 
             // තත්පර 10 සීමාව චෙක් කරනවා
             if ((targetMsg.seconds || 0) > 10) {
-                return await sock.sendMessage(remoteJid, { text: "වීඩියෝ එක තත්පර 10කට වඩා වැඩියි Anu!" }, { quoted: m });
+                return await sock.sendMessage(remoteJid, { text: "${pushName} the video is longer than 10 seconds!!! Please send a video under 10 seconds." }, { quoted: m });
             }
 
             // 1. React with loading
             await sock.sendMessage(remoteJid, { react: { text: "⏳", key: m.key } });
 
             // 2. Wait message
-            const waitMsg = await sock.sendMessage(remoteJid, { text: "_Alpha King ස්ටිකරය නිර්මාණය කරමින් පවතී... කරුණාකර රැඳී සිටින්න._ 🎨" }, { quoted: m });
+            const waitMsg = await sock.sendMessage(remoteJid, { text: "_The sticker is processing. Please wait..._ 🎨" }, { quoted: m });
 
             // 3. Media එක Download කරගන්නවා
             const stream = await downloadContentFromMessage(targetMsg, targetMsg.seconds ? 'video' : 'image');
@@ -58,7 +58,7 @@ module.exports = {
 
         } catch (e) {
             console.error("Sticker Error:", e);
-            await sock.sendMessage(remoteJid, { text: "අයියෝ! ස්ටිකර් එක හදන්න බැරි වුණා. ආයෙත් උත්සාහ කරන්න." }, { quoted: m });
+            await sock.sendMessage(remoteJid, { text: "Ops... Failed to creat sticker. Please try again." }, { quoted: m });
         }
     }
 };
