@@ -4,8 +4,8 @@ const { Sticker, StickerTypes } = require("wa-sticker-formatter");
 
 module.exports = {
     // 3. Prefix එක config එකෙන් ගන්නේ මෙතනින් (Menu එකේ පෙන්නන්න)
-    name: "sticker",
-    aliases: ["s"], // 2. aliases වල 's' තියෙන නිසා command handler එකේ දෙකම වැඩ කරන්න ඕනේ
+    name: "s",
+    aliases: ["sticker"], // 2. aliases වල 's' තියෙන නිසා command handler එකේ දෙකම වැඩ කරන්න ඕනේ
     category: "converter",
     description: "Converts image/video to sticker.",
     async execute(sock, m, args, pushName) {
