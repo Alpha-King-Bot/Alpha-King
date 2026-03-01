@@ -1,0 +1,38 @@
+const config = require('../../config');
+
+module.exports = {
+    name: 'ping',
+    category: 'main',
+    description: 'Check bot is working.',
+    async execute(sock, m, args, pushName) {
+        const uptime = process.uptime();
+        const hours = Math.floor(uptime / 3600);
+        const minutes = Math.floor((uptime % 3600) / 60);
+        const seconds = Math.floor(uptime % 60);
+
+        // කාලය පෙන්වන විදිහ ලස්සන කරන්න
+        const timeString = `${hours}h ${minutes}m ${seconds}s`;
+
+        const aliveMsg = `*─── 『 ${config.botName.toUpperCase()} 』 ───*
+
+👋 *Hellow ${pushName},*
+
+I'm *${config.botName}* & alive at now! 
+
+╭───────────────────╼
+│ ⚡ *Status:* Online
+│ ⏰ *Uptime:* ${timeString}
+│ 🛠️ *Developer:* ${config.developerName}
+│ 🕹️ *Prefix:* [ ${config.prefix} ]
+╰───────────────────╼
+
+> 📝 _Type *${config.prefix}menu* to see all commands._
+
+*Powered by ${config.developerName}*`;
+
+        await sock.sendMessage(m.key.remoteJid, { 
+            image: { url: config.botLogo }, 
+            caption: aliveMsg 
+        },{quoted: m});
+    }
+};

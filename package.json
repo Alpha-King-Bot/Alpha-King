@@ -1,0 +1,17 @@
+{
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@whiskeysockets/baileys": "^7.0.0-rc.9",
+    "axios": "^1.13.5",
+    "express": "^5.2.1",
+    "ffmpeg": "^0.0.4",
+    "google-it": "^1.6.4",
+    "openai": "^6.25.0",
+    "performance-now": "^2.1.0",
+    "pino": "^10.3.1",
+    "wa-sticker-formatter": "^4.4.4"
+  },
+  "scripts": {
+    "start": "node index.js"
+  }
+}
