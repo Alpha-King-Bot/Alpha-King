@@ -13,13 +13,13 @@ global.commands = new Map();
 
 const express = require('express');
 const app = express();
-const port = process.env.PORT || 3000;
+const port = process.env.PORT || 5000;
 
 app.get('/', (req, res) => {
   res.send('Alpha-King Bot is Running! 🚀');
 });
 
-app.listen(port, () => {
+app.listen(port, '0.0.0.0', () => {
   console.log(`Web Server started on port ${port}`);
 });
 
