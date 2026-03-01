@@ -1,0 +1,7 @@
+node index.js
+
+npm start
+
+git add .
+git commit -m "Alpha-King"
+git push
