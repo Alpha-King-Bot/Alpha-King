@@ -24,7 +24,7 @@ module.exports = {
                 return await sock.sendMessage(
                     remoteJid,
                     {
-                        text: `Please Reply to an image/video with *${config.prefix}sticker*`,
+                        text: `Please Reply to an image/video with *${config.prefix}sticker* / *${config.prefix}s*`,
                     },
                     { quoted: m },
                 );
