@@ -49,7 +49,7 @@ module.exports = {
 
 *🎭 HACK COMMANDS*
 │ ❯ *${config.prefix}save* Save Status (Coming Soon)
-│ ❯ *${config.prefix}getdp* Get Profile Pictue
+│ ❯ *${config.prefix}getdp* Get Profile Picture
 │ ❯ *${config.prefix}vv* See View Once Document (Coming Soon)
 │ ❯ *${config.prefix}grpling* Get Group Link (Coming Soon)
 

@@ -16,5 +16,5 @@ Add
 Kick
 Promote
 Demote
-Getdp
+
 Lv
