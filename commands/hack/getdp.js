@@ -8,60 +8,59 @@ module.exports = {
     async execute(sock, m, args, pushName) {
         try {
             const remoteJid = m.key.remoteJid;
-            let targetJid = remoteJid; // Default: Current chat
 
-            // Check if sender is owner
-            if (!config.ownerNumbers.includes(m.key.remoteJid.split("@")[0])) {
+            // 1. Sender ව නිවැරදිවම හඳුනාගැනීම
+            let sender = m.key.fromMe
+                ? sock.user.id.split(":")[0] + "@s.whatsapp.net"
+                : m.key.participant || m.key.remoteJid;
+
+            const senderNumber = sender.split("@")[0];
+
+            // 2. Owner Lock
+            if (!config.ownerNumbers.includes(senderNumber)) {
                 return await sock.sendMessage(
-                    m.key.remoteJid,
+                    remoteJid,
                     {
-                        text: "❌ *Access Denied:* Only the bot owner can use this command.",
+                        text: `❌ *Access Denied:* Only the bot owner can use this command.`,
                     },
                     { quoted: m },
                 );
             }
 
-            // 1. Check if a user is tagged or quoted
-            if (
-                m.message.extendedTextMessage?.contextInfo?.mentionedJid
-                    ?.length > 0
-            ) {
-                targetJid =
-                    m.message.extendedTextMessage.contextInfo.mentionedJid[0];
-            } else if (
-                m.message.extendedTextMessage?.contextInfo?.participant
-            ) {
-                targetJid =
-                    m.message.extendedTextMessage.contextInfo.participant;
+            // 3. Target JID එක තෝරා ගැනීම
+            let targetJid = remoteJid;
+            const quoted = m.message?.extendedTextMessage?.contextInfo;
+
+            if (quoted?.mentionedJid?.[0]) {
+                targetJid = quoted.mentionedJid[0];
+            } else if (quoted?.participant) {
+                targetJid = quoted.participant;
             }
 
-            // Reaction
             await sock.sendMessage(remoteJid, {
                 react: { text: "🔍", key: m.key },
             });
 
-            // 2. Fetch Profile Picture URL
+            // 4. DP එක Fetch කිරීම
             let ppUrl;
             try {
                 ppUrl = await sock.profilePictureUrl(targetJid, "image");
             } catch (e) {
-                // If no profile picture or error
                 return await sock.sendMessage(
                     remoteJid,
                     {
-                        text: `❌ *Error:* Could not fetch profile picture. It might be private.`,
+                        text: `❌ *Error:* Profile picture is not available or it is private.`,
                     },
                     { quoted: m },
                 );
             }
 
-            // 3. Send the Profile Picture
             await sock.sendMessage(
                 remoteJid,
                 {
                     image: { url: ppUrl },
-                    caption: `✅ *Profile Picture* for @${targetJid.split("@")[0]}`,
-                    mentions: [targetJid], // Tag the user
+                    caption: `✅ Succesfully get the *Profile Picture* of ${pushname}`,
+                    mentions: [targetJid],
                 },
                 { quoted: m },
             );
@@ -70,7 +69,7 @@ module.exports = {
             await sock.sendMessage(
                 m.key.remoteJid,
                 {
-                    text: `❌ *Error:* Failed to get profile picture.`,
+                    text: `~~❌ *Error:* Processing failed.~~`,
                 },
                 { quoted: m },
             );

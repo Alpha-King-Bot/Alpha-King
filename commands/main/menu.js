@@ -1,18 +1,20 @@
-const config = require('../../config');
+const config = require("../../config");
 
 module.exports = {
-    name: 'menu',
-    category: 'main',
-    description: 'Show the bot command menu.',
+    name: "menu",
+    category: "main",
+    description: "Show the bot command menu.",
     async execute(sock, m, args) {
         // 1. React to the message
-        await sock.sendMessage(m.key.remoteJid, { react: { text: '📜', key: m.key } });
+        await sock.sendMessage(m.key.remoteJid, {
+            react: { text: "📜", key: m.key },
+        });
 
         // 2. Setup the Header and Content using Config variables
         const botHeader = `*─── 『 ${config.botName.toUpperCase()} 』 ───*`;
-        
+
         let menuBody = `
-👋 *Hello, ${m.pushName || 'User'}!*
+👋 *Hello, ${m.pushName || "User"}!*
 
 🤖 *Bot:* ${config.botName}
 👨 *Owner:* ${config.developerName}
@@ -105,10 +107,14 @@ module.exports = {
 *────────────────────*
 > *Powered by ${config.developerName}*`;
 
-       // Image යවන කොට Header එකත් එක්කම යවන්න
-        await sock.sendMessage(m.key.remoteJid, { 
-            image: { url: config.botLogo }, 
-            caption: botHeader + '\n' + menuBody // මෙතනට botHeader එක එකතු කළා
-        }, { quoted: m });
-    }
+        // Image යවන කොට Header එකත් එක්කම යවන්න
+        await sock.sendMessage(
+            m.key.remoteJid,
+            {
+                image: { url: config.botLogo },
+                caption: botHeader + "\n" + menuBody, // මෙතනට botHeader එක එකතු කළා
+            },
+            { quoted: m },
+        );
+    },
 };
