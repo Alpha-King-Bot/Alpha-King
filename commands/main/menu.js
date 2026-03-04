@@ -79,7 +79,7 @@ module.exports = {
 │ ❯ *${config.prefix}reqcmd* Request A Command (Coming Soon)
 
 *😎 FUN COMMANDS*
-│ ❯ *${config.prefix}lv* Love Calculator (Coming Soon)
+│ ❯ *${config.prefix}lv* Love Calculator
 │ ❯ *${config.prefix}readmore* Get A read More Msg (Coming Soon)
 
 *👥 GROUP COMMANDS*

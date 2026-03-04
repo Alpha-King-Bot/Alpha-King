@@ -1,8 +1,8 @@
 const config = require("../../config");
 
 module.exports = {
-    name: "love",
-    aliases: ["lv", "lovecalc"],
+    name: "lv",
+    aliases: ["love", "lovecalc"],
     category: "fun",
     description: "Calculate love percentage between two names.",
     async execute(sock, m, args, pushName) {
@@ -18,7 +18,7 @@ module.exports = {
                 return await sock.sendMessage(
                     remoteJid,
                     {
-                        text: `⚠️ *Usage:* ${config.prefix}lv Name1 & Name2`,
+                        text: `⚠️ Please Type *${config.prefix}lv Name1 & Name2*`,
                     },
                     { quoted: m },
                 );
@@ -32,14 +32,14 @@ module.exports = {
             if (!name1 || !name2) {
                 return await sock.sendMessage(
                     remoteJid,
-                    { text: "❌ *Error:* Please provide two names!" },
+                    { text: "Please enter two names to calculate!!" },
                     { quoted: m },
                 );
             }
 
             // 2. පාවිච්චි කරන්න බැරි නම් ලැයිස්තුව (Blacklist)
             // මේ නම් තිබුනොත් බොට් බනිනවා
-            const blacklisted = ["sayuru", "Sayuru", "anuhas", "Anuhas"]; // ඔයාට කැමති නම් මෙතනට දාන්න
+            const blacklisted = ["sayuru", "Sayuru", "anuhas", "Anuhas",'Munasinghe','munasinghe']; // ඔයාට කැමති නම් මෙතනට දාන්න
 
             const isBlacklisted = blacklisted.some(
                 (b) =>
@@ -51,7 +51,7 @@ module.exports = {
                 return await sock.sendMessage(
                     remoteJid,
                     {
-                        text: `🚫 *Access Denied:* These names are not allowed for calculation! Please use your name.`,
+                        text: `🚫 *Access Denied:* These names are not allowed for calculation! Please use your name. If you need to use this name please contact owner...`,
                     },
                     { quoted: m },
                 );
@@ -92,7 +92,7 @@ module.exports = {
                 react: { text: emoji, key: m.key },
             });
 
-            const resultMsg = `*─── 『 LOVE CALCULATOR 』 ───*
+            const resultMsg = `*─── 『 ${config.botName} LOVE CALCULATOR 』 ───*
 
 👩‍❤️‍👨 *Names:* ${name1} & ${name2}
 📈 *Percentage:* ${percentage}%
@@ -103,7 +103,7 @@ module.exports = {
 
             await sock.sendMessage(
                 remoteJid,
-                { text: `~~${resultMsg}~~` },
+                { text: `${resultMsg}` },
                 { quoted: m },
             );
         } catch (e) {
