@@ -9,32 +9,35 @@ module.exports = {
         try {
             const remoteJid = m.key.remoteJid;
 
-            // 1. Sender ව නිවැරදිවම හඳුනාගැනීම
+            // 1. Sender හඳුනාගැනීම (Owner check එකට)
             let sender = m.key.fromMe
                 ? sock.user.id.split(":")[0] + "@s.whatsapp.net"
                 : m.key.participant || m.key.remoteJid;
 
             const senderNumber = sender.split("@")[0];
 
-            // 2. Owner Lock
-            if (!config.ownerNumbers.includes(senderNumber)) {
-                return await sock.sendMessage(
-                    remoteJid,
-                    {
-                        text: `❌ *Access Denied:* Only the bot owner can use this command.`,
-                    },
-                    { quoted: m },
-                );
-            }
+            // 2. Owner Lock (config එකේ ownerNumbers නිවැරදිද බලන්න)
+            //if (!config.ownerNumbers.includes(senderNumber)) {
+                //return await sock.sendMessage(
+                    //remoteJid,
+                    //{
+                        //text: `❌ *Access Denied:* Only the bot owner can use this command.`,
+                    //},
+                    //{ quoted: m },
+                //);
+            //}
 
-            // 3. Target JID එක තෝරා ගැනීම
-            let targetJid = remoteJid;
+            // 3. Target JID තෝරා ගැනීම (Reply / Mention / Self)
+            let targetJid;
             const quoted = m.message?.extendedTextMessage?.contextInfo;
 
             if (quoted?.mentionedJid?.[0]) {
                 targetJid = quoted.mentionedJid[0];
             } else if (quoted?.participant) {
                 targetJid = quoted.participant;
+            } else {
+                // කිසිවක් නැත්නම් තමන්ගේම DP එක පෙන්වන්න
+                targetJid = m.key.participant || m.key.remoteJid;
             }
 
             await sock.sendMessage(remoteJid, {
@@ -55,11 +58,12 @@ module.exports = {
                 );
             }
 
+            // 5. Image එක යැවීම (මෙතන pushName හරියටම දාලා තියෙන්නේ)
             await sock.sendMessage(
                 remoteJid,
                 {
                     image: { url: ppUrl },
-                    caption: `✅ Succesfully get the *Profile Picture* of ${pushname}`,
+                    caption: `✅ Successfully retrieved the *Profile Picture*\n\n> *Requested by:* ${pushName}`,
                     mentions: [targetJid],
                 },
                 { quoted: m },
@@ -68,9 +72,7 @@ module.exports = {
             console.error(e);
             await sock.sendMessage(
                 m.key.remoteJid,
-                {
-                    text: `~~❌ *Error:* Processing failed.~~`,
-                },
+                { text: `~~❌ *Error:* Processing failed.~~` },
                 { quoted: m },
             );
         }

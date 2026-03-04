@@ -44,7 +44,7 @@ module.exports = {
 │ ❯ *${config.prefix}toqr* Get A QR (Coming Soon)
 
 *🌆 MEDIA COMMANDS*
-│ ❯ *${config.prefix}removebg / ${config.prefix}rbg* Remove Background (Coming Soon)
+│ ❯ *${config.prefix}removebg / ${config.prefix}rbg* Remove Background
 │ ❯ *${config.prefix}stext* Stylish Text (Coming Soon)
 
 *🎭 HACK COMMANDS*

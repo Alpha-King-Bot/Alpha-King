@@ -21,6 +21,7 @@ const config = {
     botLogo: "./Media/Images/Bot Logo/logo.png",
     geminiApiKey: "AIzaSyC3glRGx2AolxG7Fs0m7mzR7QzahS0Rl-Q",
     openAiKey: "",
+    removeBgApiKey: "ZpGv2zHqfSNhMNaWsH5EozMM",
     cat1: [""],
     cat2: [""],
     cat3: [""],

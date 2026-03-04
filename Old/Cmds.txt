@@ -5,7 +5,7 @@
 Coucom
 
 Gif
-Removebg
+
 Song
 Movie
 Game
@@ -17,4 +17,3 @@ Kick
 Promote
 Demote
 
-Lv
