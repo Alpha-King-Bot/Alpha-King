@@ -48,9 +48,9 @@ module.exports = {
 │ ❯ *${config.prefix}stext* Stylish Text (Coming Soon)
 
 *🎭 HACK COMMANDS*
-│ ❯ *${config.prefix}save* Save Status (Coming Soon)
+│ ❯ *${config.prefix}save* Save Status
 │ ❯ *${config.prefix}getdp* Get Profile Picture
-│ ❯ *${config.prefix}vv* See View Once Document (Coming Soon)
+│ ❯ *${config.prefix}vv* See View Once Document
 │ ❯ *${config.prefix}grpling* Get Group Link (Coming Soon)
 
 *🔍 SEARCH COMMANDS*
@@ -83,8 +83,8 @@ module.exports = {
 │ ❯ *${config.prefix}readmore* Get A read More Msg (Coming Soon)
 
 *👥 GROUP COMMANDS*
-│ ❯ *${config.prefix}add* Add A Member (Coming Soon)
-│ ❯ *${config.prefix}kick* Remove A Member (Coming Soon)
+│ ❯ *${config.prefix}add* Add A Member
+│ ❯ *${config.prefix}kick* Remove A Member
 │ ❯ *${config.prefix}mute* Mute A Member (Coming Soon)
 │ ❯ *${config.prefix}unmute* Unmute A Member (Coming Soon)
 │ ❯ *${config.prefix}promote* Make Admin (Coming Soon)
