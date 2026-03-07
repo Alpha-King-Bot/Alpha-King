@@ -5,16 +5,17 @@ const {
     fetchLatestBaileysVersion,
 } = require("@whiskeysockets/baileys");
 const P = require("pino");
-const axios = require("axios");
+const mongoose = require("mongoose");
 const config = require("./config");
 const fs = require("fs");
 const path = require("path");
+
 global.commands = new Map();
 
+// --- WEB SERVER FOR KEEP ALIVE ---
 const express = require("express");
 const app = express();
 const port = process.env.PORT || 5000;
-
 const keepAlive = require("./server");
 keepAlive();
 
@@ -26,7 +27,32 @@ app.listen(port, "0.0.0.0", () => {
     console.log(`Web Server started on port ${port}`);
 });
 
-// Loading Commands
+// --- 1. MONGODB CONNECTION & SCHEMA ---
+//
+mongoose
+    .connect(config.botStatusUrl)
+    .then(() => console.log("Connected to MongoDB Database! 📂"))
+    .catch((err) => console.error("MongoDB Connection Error:", err.message));
+
+const StatusSchema = new mongoose.Schema({
+    id: { type: String, default: "bot_status" },
+    isActive: { type: Boolean, default: true },
+});
+const StatusModel = mongoose.model("Status", StatusSchema);
+
+// --- 1. MONGODB Cha History & SCHEMA ---
+//
+const ChatSchema = new mongoose.Schema({
+    sender: String,
+    pushName: String,
+    message: String,
+    timestamp: { type: Date, default: Date.now },
+    isGroup: Boolean,
+    groupName: { type: String, default: "Private Chat" },
+});
+const ChatModel = mongoose.model("ChatHistory", ChatSchema);
+
+// --- LOADING COMMANDS ---
 const folders = fs.readdirSync("./commands");
 for (const folder of folders) {
     const commandFiles = fs
@@ -45,11 +71,10 @@ async function startBot() {
     const sock = makeWASocket({
         version,
         auth: state,
-        printQRInTerminal: !config.pairedNumber, // Show QR if no is not available
+        printQRInTerminal: !config.pairedNumber,
         logger: P({ level: "silent" }),
     });
 
-    // Get Pairing Code
     if (config.pairedNumber && !sock.authState.creds.registered) {
         setTimeout(async () => {
             let code = await sock.requestPairingCode(config.pairedNumber);
@@ -71,11 +96,11 @@ async function startBot() {
         }
     });
 
-    // Msg control
+    // --- MESSAGE HANDLING ---
     sock.ev.on("messages.upsert", async (chat) => {
         const m = chat.messages[0];
+        if (!m.message) return;
 
-        const messageType = Object.keys(m.message || {})[0];
         const messageText =
             m.message?.conversation ||
             m.message?.extendedTextMessage?.text ||
@@ -83,68 +108,120 @@ async function startBot() {
             m.message?.videoMessage?.caption ||
             "";
         const sender = m.key.remoteJid;
-        const isOwner = config.ownerNumbers.some((num) => sender.includes(num));
-        const pushName = m.pushName || "User";
 
-        // 1. Check status fom database
-        let botStatus = "true";
-        try {
-            const response = await axios.get(config.botStatusUrl);
-            // JSONbin පාවිච්චි කරන්නේ නම් response.data.record.status ලෙස වෙනස් විය හැක
-            botStatus = response.data.status || response.data;
-        } catch (e) {
-            console.error("Database Error:", e.message);
+        // --- CHAT HISTORY LOGGER ---
+        //
+        const isGroup = sender.endsWith("@g.us");
+        let groupMetadata = null;
+
+        if (isGroup) {
+            try {
+                groupMetadata = await sock.groupMetadata(sender);
+            } catch (e) {
+                console.log("Error fetching group metadata");
+            }
         }
 
-        // 2. Status Lock එක පරීක්ෂා කිරීම
-        const isTrue = String(botStatus).toLowerCase() === "true";
+        // Sender Number Extraction (LID Safe)
+        const senderNumber = (m.key.participant || m.key.remoteJid)
+            .split("@")[0]
+            .replace(/[^0-9]/g, "");
+        const isOwner = config.ownerNumbers.some(
+            (num) => senderNumber === num.replace(/[^0-9]/g, ""),
+        );
+        const pushName = m.pushName || "User";
 
-        // Command එකක්දැයි බැලීම (උදා: .ping)
+        // ඩේටාබේස් එකට සේව් කිරීම
+        await ChatModel.create({
+            sender: senderNumber,
+            pushName: pushName,
+            message: messageText || "[Media/Other]",
+            isGroup: isGroup,
+            groupName: isGroup ? groupMetadata?.subject : "Private Chat",
+        });
+
+        console.log(`[DB LOG] Message saved from ${pushName}`);
+
+        // Command Recognition
         if (messageText.startsWith(config.prefix)) {
-            // ස්ටේටස් එක False නම් සහ එවන්නා Owner නොවේ නම් වැඩ කරන්නේ නැත
-            if (!isTrue && !isOwner) {
-                return console.log("Bot is currently OFF. Command ignored.");
+            const args = messageText.trim().split(/ +/).slice(1);
+            const commandName = messageText
+                .slice(config.prefix.length)
+                .trim()
+                .split(/ +/)[0]
+                .toLowerCase();
+
+            // 1. Fetch Bot Status from DB
+            let dbStatus = await StatusModel.findOne({
+                id: "bot_status",
+            }).lean(); // .lean() දැම්මම වේගවත් වෙනවා
+            if (!dbStatus) {
+                dbStatus = await StatusModel.create({
+                    id: "bot_status",
+                    isActive: true,
+                });
             }
 
-            const args = messageText.trim().split(/ +/).slice(1) || [];
-            const commandName = messageText.startsWith(config.prefix)
-                ? messageText
-                      .slice(config.prefix.length)
-                      .trim()
-                      .split(/ +/)[0]
-                      .toLowerCase()
-                : null;
+            const isBotActive =
+                dbStatus.isActive === true || dbStatus.isActive === "true";
 
-            // --- 1. Allowed Groups & Owner Check (වැදගත්ම කොටස) ---
-            const isGroup = m.key.remoteJid.endsWith("@g.us");
+            // --- CONSOLE DEBUG SECTION ---
+            console.log("--- DATABASE SYNC ---");
+            console.log(
+                `Raw Value from DB: ${dbStatus.isActive} (${typeof dbStatus.isActive})`,
+            );
+            console.log(`Final Boolean Status: ${isBotActive}`);
+
+            // 2. White-list (Commands allowed even when OFF)
+            const whiteList = ["alive", "getid", "botstatus"];
+
+            // 3. MAIN BLOCKING LOGIC
+            //
+            if (!isBotActive && !whiteList.includes(commandName) && !isOwner) {
+                console.log(
+                    `[STATUS: BLOCKED] Command "${commandName}" ignored because Bot is OFF.`,
+                );
+                return; // මෙය ක්‍රියාත්මක වීම මෙතනින් නවතී
+            }
+
+            // 4. Group Restrictions
+            const isGroup = sender.endsWith("@g.us");
             const isAllowedGroup = config.allowedGroups
-                ? config.allowedGroups.includes(m.key.remoteJid)
+                ? config.allowedGroups.includes(sender)
                 : false;
 
-            // --- 2. Restriction Logic ---
-            if (commandName && isGroup) {
-                // Check if the command is NOT 'getid' AND the group is NOT in the allowed list
-                if (commandName !== "getid" && !isAllowedGroup) {
-                    console.log(
-                        `[BLOCKED] Command "${commandName}" restricted in this group.`,
-                    );
-                    return; // මෙය ක්‍රියාත්මක වීම මෙතනින් නවතී
-                }
+            if (
+                isGroup &&
+                commandName !== "getid" &&
+                !isAllowedGroup &&
+                !isOwner
+            ) {
+                console.log(
+                    `[STATUS: RESTRICTED] Group not in allowed list: ${sender}`,
+                );
+                return;
             }
 
-            if (commandName && commands.has(commandName)) {
-                // Status Lock Check
-                if (!isTrue && !isOwner) return;
-
+            // 5. Execute Command
+            if (commands.has(commandName)) {
                 const command = commands.get(commandName);
                 try {
+                    console.log(
+                        `[STATUS: PROCEED] Executing command: ${commandName}`,
+                    );
                     await command.execute(sock, m, args, pushName);
                 } catch (error) {
-                    console.error(error);
-                    await sock.sendMessage(sender, {
-                        text: " Sorry. System Error. Please contact owner",
-                    });
+                    console.error("EXECUTION ERROR:", error);
+                    await sock.sendMessage(
+                        sender,
+                        { text: "❌ System Error. Contact Owner." },
+                        { quoted: m },
+                    );
                 }
+            } else {
+                console.log(
+                    `[STATUS: NOT FOUND] Command "${commandName}" does not exist.`,
+                );
             }
         }
     });

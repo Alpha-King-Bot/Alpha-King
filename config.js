@@ -18,7 +18,8 @@ const config = {
     prefix: ".",
     pairedNumber: "94777892536",
     allowedGroups: ["120363422631482082@g.us", "120363423691940922@g.us"],
-    botStatusUrl: "https://api.jsonbin.io/v3/b/699ece2543b1c97be99c4f48",
+    botStatusUrl:
+        "mongodb+srv://Alpha-King:Alpha123@alpha-king.4tso8iw.mongodb.net/?appName=Alpha-King",
     botLogo: "./Media/Images/Bot Logo/logo.png",
     geminiApiKey: "AIzaSyC3glRGx2AolxG7Fs0m7mzR7QzahS0Rl-Q",
     openAiKey: "",
