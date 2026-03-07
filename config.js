@@ -2,21 +2,21 @@ const config = {
     botName: "Alpha King",
     ownerName: "Anu",
     developerName: "Anu",
-    ownerNumbers: [
+    adminNumbers: [
         "94777892536",
         "67672159084565",
         "67672159084565@lid",
         "0777892536",
         "94777892536@s.whatsapp.net",
     ],
-    adminNumbers: [
+    ownerNumbers: [
         "22330189328469@lid",
         "22330189328469",
         "94766357263",
         "0766357263",
     ],
     prefix: ".",
-    pairedNumber: "94777892536",
+    pairedNumber: "94766357263",
     allowedGroups: ["120363422631482082@g.us", "120363423691940922@g.us"],
     botStatusUrl:
         "mongodb+srv://Alpha-King:Alpha123@alpha-king.4tso8iw.mongodb.net/?appName=Alpha-King",
